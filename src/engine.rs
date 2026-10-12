@@ -27,11 +27,5 @@ impl Default for RenderContext {
 }
 
 pub trait Engine {
-    fn paint(&self, painter: &mut Painter);
-
-    fn bottom_panel(&mut self, ui: &mut Ui);
-
-    fn context(&self) -> &RenderContext;
-
-    fn context_mut(&mut self) -> &mut RenderContext;
+    fn paint(&self, painter: &mut Painter, ctx: &RenderContext);
 }

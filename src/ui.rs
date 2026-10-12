@@ -1,13 +1,14 @@
 use eframe::egui::{self, Color32, Ui};
 
 use crate::{
-    engine::{self, Engine, EngineKind},
+    engine::{self, Engine, EngineKind, RenderContext},
     software_engine::SoftwareEngine,
 };
 
 pub struct UserInterface {
     engine_kind: EngineKind,
     engine: Box<dyn Engine>,
+    context: RenderContext,
 }
 
 impl Default for UserInterface {
@@ -15,6 +16,7 @@ impl Default for UserInterface {
         Self {
             engine_kind: EngineKind::Software,
             engine: Box::new(SoftwareEngine::default()),
+            context: RenderContext::default(),
         }
     }
 }
@@ -27,10 +29,14 @@ impl UserInterface {
         }
     }
 
-    fn left_panel(&mut self, ui: &mut Ui) {
-        ui.heading("Electrag");
-        ui.separator();
+    fn side_panel(&mut self, ui: &mut Ui) {
+        ui.heading("General");
 
+        self.general_settings(ui);
+
+    }
+
+    fn general_settings(&mut self, ui:&mut Ui) {
         let previous_kind = self.engine_kind;
 
         egui::ComboBox::from_label("Choose Engine")
@@ -48,10 +54,10 @@ impl UserInterface {
             self.construct_engine();
         }
 
-        let ctx = self.engine.context_mut();
 
-        ui.checkbox(&mut ctx.draw_isolines, "Draw Isolines");
-        ui.checkbox(&mut ctx.draw_field_lines, "Draw Field Lines");
+        ui.checkbox(&mut self.context.draw_isolines, "Draw Isolines");
+        ui.checkbox(&mut self.context.draw_field_lines, "Draw Field Lines");
+        ui.checkbox(&mut self.context.draw_grid, "Draw Grid");
     }
 
     fn canvas(&self, ui: &mut Ui) {
@@ -71,14 +77,7 @@ impl eframe::App for UserInterface {
             .default_width(220.0)
             .min_width(120.0)
             .max_width(450.0)
-            .show(ctx, |ui| self.left_panel(ui));
-
-        egui::TopBottomPanel::bottom("bottom_panel")
-            .resizable(true)
-            .default_height(140.0)
-            .min_height(120.0)
-            .max_height(350.0)
-            .show(ctx, |ui| self.engine.bottom_panel(ui));
+            .show(ctx, |ui| self.side_panel(ui));
 
         egui::CentralPanel::default().show(ctx, |ui| self.canvas(ui));
     }
